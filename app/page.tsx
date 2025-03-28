@@ -1,102 +1,128 @@
-import Image from "next/image";
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { createClient } from '@/lib/supabase-client';
+import { ImageGrid } from '@/components/puzzle/image-grid';
+import { SuccessAnimation } from '@/components/puzzle/success-animation';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { getCurrentWeekday, arraysEqual } from '@/lib/utils';
+import { Toaster, toast } from 'react-hot-toast';
+import { PuzzleClient } from '@/lib/database.types';
 
 export default function Home() {
+  const [puzzle, setPuzzle] = useState<PuzzleClient | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [attempts, setAttempts] = useState(0);
+  const supabase = createClient();
+  
+  useEffect(() => {
+    async function fetchTodaysPuzzle() {
+      try {
+        const weekday = getCurrentWeekday();
+        
+        // Get puzzle for today using API
+        const response = await fetch(`/api/puzzles?weekday=${weekday}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          setPuzzle(data);
+        } else if (response.status === 404) {
+          // Try to get any puzzle as fallback
+          const fallbackResponse = await fetch('/api/puzzles');
+          if (fallbackResponse.ok) {
+            const puzzles = await fallbackResponse.json();
+            if (puzzles.length > 0) {
+              setPuzzle(puzzles[0]);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching puzzle:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    fetchTodaysPuzzle();
+  }, []);
+  
+  const handleSelectionComplete = (selectedTiles: number[]) => {
+    if (!puzzle) return;
+    
+    setAttempts(attempts + 1);
+    
+    if (arraysEqual(selectedTiles, puzzle.correctTiles)) {
+      setShowSuccess(true);
+    } else {
+      toast.error('Incorrect selection. Please try again.', {
+        icon: '🤖',
+        style: {
+          borderRadius: '10px',
+          background: '#333',
+          color: '#fff',
+        },
+      });
+    }
+  };
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-xl">Loading puzzle...</p>
+      </div>
+    );
+  }
+  
+  if (!puzzle) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-center">No Puzzle Available</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center">
+            <p className="mb-4">There is no puzzle available for today.</p>
+            <p>Please check back later or contact the administrator.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+  
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+    <div className="min-h-screen flex flex-col items-center justify-center p-4">
+      <Toaster position="top-center" />
+      
+      <header className="mb-8 text-center">
+        <h1 className="text-3xl font-bold mb-2">I'm Not a Robot</h1>
+        <p className="text-lg text-gray-600">Prove you're human by solving the puzzle below</p>
+      </header>
+      
+      <div className="w-full max-w-4xl">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-center">Verification Challenge</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ImageGrid
+              imageUrl={puzzle.imageUrl}
+              targetDescription={puzzle.targetDescription}
+              onSelectionComplete={handleSelectionComplete}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+          </CardContent>
+        </Card>
+      </div>
+      
+      {showSuccess && (
+        <SuccessAnimation onComplete={() => setShowSuccess(false)} />
+      )}
+      
+      <footer className="mt-8 text-center text-sm text-gray-500">
+        <p>Verification system powered by humans</p>
+        <p className="mt-2">
+          <a href="/admin" className="text-blue-500 hover:underline">Admin Login</a>
+        </p>
       </footer>
     </div>
   );
