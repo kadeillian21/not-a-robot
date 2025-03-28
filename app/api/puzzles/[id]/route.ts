@@ -4,11 +4,15 @@ import { createAdminClient } from '@/lib/supabase-admin';
 // GET /api/puzzles/[id] - Get a specific puzzle
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
 ) {
   try {
+    // Extract id from URL
+    const url = new URL(request.url);
+    const pathSegments = url.pathname.split('/');
+    const idStr = pathSegments[pathSegments.length - 1];
+    const id = parseInt(idStr);
+    
     const supabase = createAdminClient();
-    const id = parseInt(params.id);
     
     const { data, error } = await supabase
       .from('puzzles')
@@ -46,11 +50,15 @@ export async function GET(
 // PUT /api/puzzles/[id] - Update a puzzle
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
 ) {
   try {
+    // Extract id from URL
+    const url = new URL(request.url);
+    const pathSegments = url.pathname.split('/');
+    const idStr = pathSegments[pathSegments.length - 1];
+    const id = parseInt(idStr);
+    
     const supabase = createAdminClient();
-    const id = parseInt(params.id);
     const body = await request.json();
     const { imageUrl, targetDescription, correctTiles } = body;
     
@@ -115,11 +123,15 @@ export async function PUT(
 // DELETE /api/puzzles/[id] - Delete a puzzle
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
 ) {
   try {
+    // Extract id from URL
+    const url = new URL(request.url);
+    const pathSegments = url.pathname.split('/');
+    const idStr = pathSegments[pathSegments.length - 1];
+    const id = parseInt(idStr);
+    
     const supabase = createAdminClient();
-    const id = parseInt(params.id);
     
     // Check if puzzle exists
     const { data: existingPuzzle, error: findError } = await supabase

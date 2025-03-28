@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase-admin';
-import { Puzzle } from '@/lib/database.types';
+// import { Puzzle } from '@/lib/database.types';
 
 // GET /api/puzzles - Get all puzzles
 export async function GET(request: NextRequest) {
@@ -149,10 +149,11 @@ export async function POST(request: NextRequest) {
       
       return NextResponse.json(newPuzzle);
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as Error;
     console.error('Error creating puzzle:', error);
     return NextResponse.json(
-      { error: `Failed to create puzzle: ${error?.message || 'Unknown error'}` },
+      { error: `Failed to create puzzle: ${err?.message || 'Unknown error'}` },
       { status: 500 }
     );
   }

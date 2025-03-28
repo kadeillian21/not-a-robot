@@ -35,8 +35,9 @@ export default function LoginPage() {
       }
       
       router.push('/admin');
-    } catch (error: any) {
-      toast.error(error.message || 'An error occurred during login');
+    } catch (error: unknown) {
+      const err = error as Error;
+      toast.error(err.message || 'An error occurred during login');
       console.error(error);
     } finally {
       setLoading(false);

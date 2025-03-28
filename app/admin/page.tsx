@@ -112,8 +112,9 @@ export default function AdminPage() {
       
       setImageUrl(urlData.publicUrl);
       toast.success('Image uploaded successfully');
-    } catch (error: any) {
-      toast.error(`Error uploading: ${error?.message || 'Unknown error'}`);
+    } catch (error: unknown) {
+      const err = error as Error;
+      toast.error(`Error uploading: ${err?.message || 'Unknown error'}`);
       console.error('Full upload error:', error);
     } finally {
       setUploading(false);
@@ -207,8 +208,9 @@ export default function AdminPage() {
       setTargetDescription('');
       setCorrectTiles([]);
       
-    } catch (error: any) {
-      toast.error(error?.message || 'Error saving puzzle');
+    } catch (error: unknown) {
+      const err = error as Error;
+      toast.error(err?.message || 'Error saving puzzle');
       console.error('Save puzzle error:', error);
     }
   };
@@ -337,7 +339,7 @@ export default function AdminPage() {
                     </button>
                   </div>
                   <p className="text-sm text-gray-500 mb-2">
-                    This image will be used for the "Select all squares" verification challenge.
+                    This image will be used for the &quot;Select all squares&quot; verification challenge.
                   </p>
                 </div>
               )}

@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { createClient } from '@/lib/supabase-client';
 import { ImageGrid } from '@/components/puzzle/image-grid';
 import { SuccessAnimation } from '@/components/puzzle/success-animation';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -14,7 +13,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [showSuccess, setShowSuccess] = useState(false);
   const [attempts, setAttempts] = useState(0);
-  const supabase = createClient();
+  // const supabase = createClient();
   
   useEffect(() => {
     async function fetchTodaysPuzzle() {
@@ -95,8 +94,8 @@ export default function Home() {
       <Toaster position="top-center" />
       
       <header className="mb-8 text-center">
-        <h1 className="text-3xl font-bold mb-2">I'm Not a Robot</h1>
-        <p className="text-lg text-gray-600">Prove you're human by solving the puzzle below</p>
+        <h1 className="text-3xl font-bold mb-2">I&apos;m Not a Robot</h1>
+        <p className="text-lg text-gray-600">Prove you&apos;re human by solving the puzzle below</p>
       </header>
       
       <div className="w-full max-w-4xl">

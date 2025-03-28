@@ -71,7 +71,7 @@ export function SuccessAnimation({ onComplete }: SuccessAnimationProps) {
           transition={{ delay: 0.7, duration: 0.5 }}
           className="text-gray-600 mb-4"
         >
-          You're not a robot!
+          You&apos;re not a robot!
         </motion.p>
       </motion.div>
     </div>
